@@ -295,13 +295,76 @@ tail -f /tmp/led_controller.log
 
 ### Testing
 
+#### ESP32 Unit Tests
+
+The drone side ESP32 includes comprehensive unit tests following TDD methodology:
+
+**Test Files:**
+- `test/test_patterns.cpp` - Pattern conversion and default configuration tests
+- `test/test_json_parsing.cpp` - JSON message parsing and validation tests
+
+**Run tests:**
 ```bash
-# Drone side unit tests (TODO)
-cd esp32/drone_side_esp
+cd drone_side_esp
+
+# Install PlatformIO if not already installed
+pip install platformio
+
+# Run all tests
 pio test -e seeed_xiao_esp32s3
 
-# Manual pattern test
-# Connect to base ESP32 serial and send commands
+# Run with verbose output
+pio test -e seeed_xiao_esp32s3 -v
+```
+
+**Test Coverage:**
+- ✓ Pattern string ↔ enum conversion (7 patterns)
+- ✓ Default configurations for all patterns
+- ✓ JSON parsing (valid/invalid messages)
+- ✓ Input validation (brightness, color, speed)
+- ✓ Edge cases (null input, malformed JSON)
+
+#### ROS2 Unit Tests
+
+The LED controller bridge includes 35 comprehensive unit tests:
+
+**Test File:**
+- `isaac_ros_ws/src/led_controller_bridge/test/test_led_controller_node.py`
+
+**Run tests:**
+```bash
+# Run all tests
+./jetson_prod/scripts/run-system-tests.sh --unit
+
+# Run LED controller tests only
+cd isaac_ros_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+python3 -m pytest src/led_controller_bridge/test/ -v
+
+# Run with specific filter
+python3 -m pytest src/led_controller_bridge/test/ -k "battery" -v
+```
+
+**Test Coverage:**
+- ✓ State transitions (IDLE → FLYING → LANDING, etc.)
+- ✓ Battery monitoring (normal → low battery alert)
+- ✓ LED command generation and serialization
+- ✓ Rate limiting (command cooldown)
+- ✓ Error handling (serial failures, invalid JSON)
+- ✓ Input validation (color, brightness, speed ranges)
+
+#### Manual Pattern Test
+
+Connect to base ESP32 serial and send test commands:
+```bash
+screen /dev/ttyUSB0 115200
+
+# Test FLYING pattern
+{"type":"led_command","data":{"pattern":"FLYING"},"timestamp":1699564800000}
+
+# Test custom color
+{"type":"led_command","data":{"pattern":"IDLE","color":[128,64,255],"brightness":200},"timestamp":1699564800000}
 ```
 
 ## Power Consumption
