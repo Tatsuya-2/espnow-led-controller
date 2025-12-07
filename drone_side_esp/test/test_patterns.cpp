@@ -21,6 +21,7 @@ void test_stringToPattern_valid_names() {
     TEST_ASSERT_EQUAL(LedPattern::LANDING, stringToPattern("LANDING"));
     TEST_ASSERT_EQUAL(LedPattern::EMERGENCY, stringToPattern("EMERGENCY"));
     TEST_ASSERT_EQUAL(LedPattern::LOW_BATTERY, stringToPattern("LOW_BATTERY"));
+    TEST_ASSERT_EQUAL(LedPattern::BRAINWAVE, stringToPattern("BRAINWAVE"));
 }
 
 // Test stringToPattern with invalid names (should default to IDLE)
@@ -49,6 +50,7 @@ void test_patternToString_all_patterns() {
     TEST_ASSERT_EQUAL_STRING("LANDING", patternToString(LedPattern::LANDING));
     TEST_ASSERT_EQUAL_STRING("EMERGENCY", patternToString(LedPattern::EMERGENCY));
     TEST_ASSERT_EQUAL_STRING("LOW_BATTERY", patternToString(LedPattern::LOW_BATTERY));
+    TEST_ASSERT_EQUAL_STRING("BRAINWAVE", patternToString(LedPattern::BRAINWAVE));
 }
 
 // Test roundtrip conversion (pattern -> string -> pattern)
@@ -60,7 +62,8 @@ void test_pattern_conversion_roundtrip() {
         LedPattern::FLYING,
         LedPattern::LANDING,
         LedPattern::EMERGENCY,
-        LedPattern::LOW_BATTERY
+        LedPattern::LOW_BATTERY,
+        LedPattern::BRAINWAVE
     };
 
     for (LedPattern pattern : patterns) {
@@ -154,6 +157,19 @@ void test_pattern_defaults_low_battery() {
     TEST_ASSERT_EQUAL(1000, config.speed);  // Slow blink
 }
 
+// Test default configurations for BRAINWAVE pattern (BCI control indicator)
+void test_pattern_defaults_brainwave() {
+    PatternConfig config = PatternDefaults::getDefault(LedPattern::BRAINWAVE);
+
+    TEST_ASSERT_EQUAL(LedPattern::BRAINWAVE, config.pattern);
+    // BRAINWAVE uses blue as base (gradient will be applied in update function)
+    TEST_ASSERT_EQUAL(0, config.color.r);
+    TEST_ASSERT_EQUAL(100, config.color.g);  // Cyan-blue
+    TEST_ASSERT_EQUAL(255, config.color.b);
+    TEST_ASSERT_EQUAL(180, config.brightness);  // Brighter for visibility
+    TEST_ASSERT_EQUAL(50, config.speed);  // Fast flowing for brainwave effect
+}
+
 // Test that all patterns have valid default configurations
 void test_all_patterns_have_defaults() {
     LedPattern patterns[] = {
@@ -163,7 +179,8 @@ void test_all_patterns_have_defaults() {
         LedPattern::FLYING,
         LedPattern::LANDING,
         LedPattern::EMERGENCY,
-        LedPattern::LOW_BATTERY
+        LedPattern::LOW_BATTERY,
+        LedPattern::BRAINWAVE
     };
 
     for (LedPattern pattern : patterns) {
@@ -225,6 +242,7 @@ void setup() {
     RUN_TEST(test_pattern_defaults_landing);
     RUN_TEST(test_pattern_defaults_emergency);
     RUN_TEST(test_pattern_defaults_low_battery);
+    RUN_TEST(test_pattern_defaults_brainwave);
     RUN_TEST(test_all_patterns_have_defaults);
 
     // Value range tests

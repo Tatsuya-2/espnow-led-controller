@@ -62,6 +62,9 @@ public:
             case LedPattern::LOW_BATTERY:
                 updateBlink(now);
                 break;
+            case LedPattern::BRAINWAVE:
+                updateBrainwave(now);
+                break;
         }
 
         FastLED.show();
@@ -147,6 +150,57 @@ private:
                 leds[ledIndex] = currentConfig.color;
                 leds[ledIndex].nscale8(brightness);
             }
+        }
+    }
+
+    void updateBrainwave(unsigned long now) {
+        unsigned long elapsed = now - cycleStart;
+
+        if (elapsed >= currentConfig.speed) {
+            cycleStart = now;
+            currentStep = (currentStep + 1) % 256;
+        }
+
+        // Create flowing brainwave gradient: Blue → Purple → Pink → Blue
+        // This visualizes BCI (Brain-Computer Interface) control
+        for (uint8_t i = 0; i < NUM_LEDS; i++) {
+            // Calculate position in gradient (0-255) with wave offset
+            uint8_t gradientPos = (currentStep + (i * 256 / NUM_LEDS)) % 256;
+
+            // Create smooth gradient: Blue (0-85) → Purple (86-170) → Pink (171-255)
+            CRGB color;
+            if (gradientPos < 85) {
+                // Blue to Purple transition
+                uint8_t progress = (gradientPos * 3);
+                color = CRGB(
+                    progress,           // R: 0 → 255
+                    progress / 2,       // G: 0 → 127
+                    255                 // B: constant blue
+                );
+            } else if (gradientPos < 170) {
+                // Purple to Pink transition
+                uint8_t progress = ((gradientPos - 85) * 3);
+                color = CRGB(
+                    255,                // R: constant red
+                    127 - progress / 2, // G: 127 → 0
+                    255 - progress      // B: 255 → 0
+                );
+            } else {
+                // Pink back to Blue transition
+                uint8_t progress = ((gradientPos - 170) * 3);
+                color = CRGB(
+                    255 - progress,     // R: 255 → 0
+                    0,                  // G: constant 0
+                    progress            // B: 0 → 255
+                );
+            }
+
+            // Apply wave modulation for "brainwave" effect
+            // Creates pulsing intensity like neural activity
+            float wave = sin((gradientPos + currentStep) * 0.05) * 0.3 + 0.7;  // 0.7-1.0 range
+            color.nscale8(wave * 255);
+
+            leds[i] = color;
         }
     }
 };
