@@ -119,7 +119,7 @@ pio device monitor -e esp32dev
 
 Edit `jetson_prod/config/drone/dji-drone.conf`:
 ```bash
-LED_DRONE_MAC_ADDRESS=AA:BB:CC:DD:EE:FF  # Replace with actual MAC from step 2
+DRONE_ESP32_MAC_ADDRESS=AA:BB:CC:DD:EE:FF  # Replace with actual MAC from step 2
 ```
 
 #### Method 2: Via Serial Console
@@ -204,7 +204,7 @@ tail -f /tmp/led_controller.log
 
 1. **Verify MAC address**:
    - Check drone ESP32 serial output for actual MAC
-   - Update `LED_DRONE_MAC_ADDRESS` in config
+   - Update `DRONE_ESP32_MAC_ADDRESS` in config
    - Restart ROS2 node or send `MAC:` command
 
 2. **Check WiFi channel**:

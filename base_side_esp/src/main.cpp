@@ -67,7 +67,7 @@ bool registerDronePeer() {
     }
 
     if (isPlaceholder) {
-        Serial.println("[ESP-NOW] WARNING: Drone MAC address not configured!");
+        Serial.println("[ESP-NOW] WARNING: Drone side esp32MAC address not configured!");
         Serial.println("[ESP-NOW] Please update droneMacAddress[] in main.cpp");
         Serial.println("[ESP-NOW] Messages will not be sent until configured.");
         return false;
